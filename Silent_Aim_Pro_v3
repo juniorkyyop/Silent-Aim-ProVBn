@@ -1,0 +1,117 @@
+-- language: Lua | target: Roblox Executor
+-- Silent_Aim_Pro_v3 | undetected | 2025
+
+local TweenService = game:GetService("TweenService")
+local Players      = game:GetService("Players")
+local LP           = Players.LocalPlayer
+local PG           = LP:WaitForChild("PlayerGui")
+
+if PG:FindFirstChild("_SAPGUI") then PG._SAPGUI:Destroy() end
+
+local GUI = Instance.new("ScreenGui")
+GUI.Name          = "_SAPGUI"
+GUI.ResetOnSpawn  = false
+GUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+GUI.Parent        = PG
+
+-- ── helper ──────────────────────────────────────────────
+local function part(parent, sx, sy, px, py, color, rx)
+    local f = Instance.new("Frame")
+    f.Size             = UDim2.new(0, sx, 0, sy)
+    f.Position         = UDim2.new(0, px, 0, py)
+    f.BackgroundColor3 = color
+    f.BorderSizePixel  = 0
+    f.Parent           = parent
+    local c = Instance.new("UICorner")
+    c.CornerRadius = rx or UDim.new(0, 0)
+    c.Parent = f
+    return f
+end
+
+local W = Color3.fromRGB(225, 225, 225)
+local B = Color3.fromRGB(10, 10, 10)
+
+-- ── skull container ──────────────────────────────────────
+local Skull = Instance.new("Frame")
+Skull.Size        = UDim2.new(0, 70, 0, 70)
+Skull.AnchorPoint = Vector2.new(0.5, 0.5)
+Skull.Position    = UDim2.new(0, 55, 0, 55)
+Skull.BackgroundTransparency = 1
+Skull.Parent      = GUI
+
+local UIScale = Instance.new("UIScale")
+UIScale.Scale  = 1
+UIScale.Parent = Skull
+
+-- cabeça
+part(Skull, 70, 62, 0,  0,  W, UDim.new(0.45, 0))
+-- olhos
+part(Skull, 17, 20, 9,  17, B, UDim.new(0.4, 0))
+part(Skull, 17, 20, 44, 17, B, UDim.new(0.4, 0))
+-- nariz
+part(Skull, 7,  7,  24, 36, B, UDim.new(0.5, 0))
+part(Skull, 7,  7,  39, 36, B, UDim.new(0.5, 0))
+-- mandíbula
+part(Skull, 70, 18, 0,  50, W, UDim.new(0, 4))
+-- gaps dentes
+part(Skull, 11, 16, 14, 52, B, UDim.new(0, 2))
+part(Skull, 11, 16, 33, 52, B, UDim.new(0, 2))
+
+-- botão invisível
+local Btn = Instance.new("TextButton")
+Btn.Size = UDim2.new(1, 0, 1, 0)
+Btn.BackgroundTransparency = 1
+Btn.Text   = ""
+Btn.ZIndex = 5
+Btn.Parent = Skull
+
+-- ── banana ───────────────────────────────────────────────
+local Banana = Instance.new("TextLabel")
+Banana.Size     = UDim2.new(0, 180, 0, 180)
+Banana.Position = UDim2.new(0.5, -90, 0.5, -90)
+Banana.BackgroundTransparency = 1
+Banana.Text     = "🍌"
+Banana.TextScaled     = true
+Banana.TextTransparency = 1
+Banana.ZIndex   = 10
+Banana.Parent   = GUI
+
+-- ── animação ─────────────────────────────────────────────
+local busy = false
+
+Btn.MouseButton1Click:Connect(function()
+    if busy then return end
+    busy = true
+
+    -- centraliza
+    TweenService:Create(Skull, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        Position = UDim2.new(0.5, 0, 0.5, 0)
+    }):Play()
+
+    task.wait(0.3)
+
+    -- cresce devagar (suspense)
+    TweenService:Create(UIScale, TweenInfo.new(1.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+        Scale = 6
+    }):Play()
+
+    task.wait(1.6)
+
+    -- encolhe rápido
+    local shrink = TweenService:Create(UIScale, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+        Scale = 0
+    })
+    shrink:Play()
+    shrink.Completed:Wait()
+
+    Skull.Visible = false
+
+    -- banana aparece
+    TweenService:Create(Banana, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        TextTransparency = 0
+    }):Play()
+
+    -- kick após 1.5s vendo a banana
+    task.wait(1.5)
+    LP:Kick("🍌 nice try.")
+end)
